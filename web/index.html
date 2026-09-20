@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Verify stablecoin work payments from public blockchain data without connecting a wallet."
+    />
+    <title>ProofPay — Verify stablecoin work payments</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="ProofPay home">
+        <span class="brand-mark">P</span>
+        <span>ProofPay</span>
+      </a>
+      <span class="privacy-pill">Read-only · no wallet connection</span>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <p class="eyebrow">VERIFIABLE CRYPTO WORK RECEIPTS</p>
+        <h1>Turn a stablecoin transaction into portable proof of payment.</h1>
+        <p class="lede">
+          ProofPay checks canonical USDC transfers using public blockchain data and creates a
+          privacy-conscious receipt. It never asks for a seed phrase, private key, signature, or
+          wallet connection.
+        </p>
+      </section>
+
+      <section class="workspace" aria-label="Payment verification workspace">
+        <form id="verify-form" class="verification-card">
+          <div class="card-heading">
+            <div>
+              <p class="step">01 · Verify</p>
+              <h2>Check a USDC payment</h2>
+            </div>
+            <span class="chain-badge">Arbitrum-first</span>
+          </div>
+
+          <label for="chain">Network</label>
+          <select id="chain" name="chain">
+            <option value="arbitrum">Arbitrum One</option>
+            <option value="base">Base</option>
+            <option value="ethereum">Ethereum</option>
+          </select>
+
+          <label for="tx-hash">Transaction hash</label>
+          <input
+            id="tx-hash"
+            name="txHash"
+            type="text"
+            inputmode="text"
+            spellcheck="false"
+            autocomplete="off"
+            placeholder="0x…"
+          />
+
+          <label for="public-reference">Public reference <span>optional</span></label>
+          <input
+            id="public-reference"
+            name="publicReference"
+            type="text"
+            maxlength="80"
+            placeholder="e.g. INV-2026-014"
+          />
+
+          <div class="actions">
+            <button id="verify-button" type="submit">Verify payment</button>
+            <button id="demo-button" class="secondary" type="button">View safe demo</button>
+          </div>
+          <p id="status" class="status" hidden aria-live="polite"></p>
+          <p class="microcopy">
+            Only a public transaction hash is sent to the selected network’s public RPC endpoint.
+          </p>
+        </form>
+
+        <article id="result" class="receipt-card" hidden aria-live="polite">
+          <div class="verified-row">
+            <span class="verified-icon" aria-hidden="true">✓</span>
+            <div>
+              <p class="step">02 · Receipt</p>
+              <h2>Onchain payment verified</h2>
+            </div>
+          </div>
+          <p id="amount" class="amount">—</p>
+          <dl>
+            <div><dt>Network</dt><dd id="network">—</dd></div>
+            <div><dt>From</dt><dd id="sender">—</dd></div>
+            <div><dt>To</dt><dd id="recipient">—</dd></div>
+            <div><dt>Block time</dt><dd id="block-time">—</dd></div>
+            <div><dt>Confirmations</dt><dd id="confirmations">—</dd></div>
+            <div><dt>Reference</dt><dd id="reference-output">—</dd></div>
+          </dl>
+          <div class="receipt-actions">
+            <button id="download-button" type="button">Download JSON proof</button>
+            <a id="explorer-link" href="#" target="_blank" rel="noreferrer">Open explorer ↗</a>
+            <button id="reset-button" class="text-button" type="button">Start over</button>
+          </div>
+        </article>
+      </section>
+
+      <section class="trust-grid" aria-label="How ProofPay works">
+        <article>
+          <span>01</span>
+          <h3>Read public data</h3>
+          <p>Fetch the confirmed transaction receipt from the network’s public JSON-RPC endpoint.</p>
+        </article>
+        <article>
+          <span>02</span>
+          <h3>Match canonical USDC</h3>
+          <p>Decode only Transfer logs emitted by Circle’s native USDC contract on that network.</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h3>Export a receipt</h3>
+          <p>Create a portable JSON record with the amount, addresses, block time, and method.</p>
+        </article>
+      </section>
+
+      <section class="use-cases">
+        <div>
+          <p class="eyebrow">BUILT FOR REAL WORK</p>
+          <h2>Evidence for freelancers, grant teams, and crypto-native operations.</h2>
+        </div>
+        <ul>
+          <li>Confirm a client’s stablecoin payment without exposing a wallet session.</li>
+          <li>Attach a verifiable receipt to an invoice, grant milestone, or contractor record.</li>
+          <li>Separate real income from promised rewards using onchain evidence.</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      <p>ProofPay prototype · built during Crypto World’s Fair 2026</p>
+      <p>Public data only. Not accounting, tax, legal, or custody software.</p>
+    </footer>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
