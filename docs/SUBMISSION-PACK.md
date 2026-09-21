@@ -14,7 +14,7 @@ Freelancers, grant teams and crypto-native operators often have a transaction ha
 2. ProofPay reads the public receipt and matches only a transfer emitted by the configured canonical stablecoin contract.
 3. The app produces a `proofpay.receipt.v1` JSON record.
 4. The anchor module removes optional references and other metadata, canonicalizes only public transfer facts, and calculates a SHA-256 digest.
-5. A user may choose to anchor that digest in `ProofPayReceiptRegistry` on Arbitrum. This optional step requires a wallet signature; read-only verification does not.
+5. A user may choose to anchor that digest in the live `ProofPayReceiptRegistry` on Arbitrum Sepolia. This optional step requires a compatible wallet signature; read-only verification does not.
 6. Any reviewer can retrieve the anchor and compare the digest to the supplied receipt file.
 
 ## Why Arbitrum
@@ -26,6 +26,15 @@ Official USDG mainnet address on Arbitrum One, for production verification only:
 `0x004B506865409877C9fA29bfb1ebA929984B9bbC`
 
 Never use a mainnet address or asset for Buildathon testing. A human must confirm the correct test configuration from official documentation before deployment.
+
+## Verified Arbitrum Sepolia deployment
+
+- Registry: `0x19A333DCcE504858AedAd6D8E3cd3d9d7FB6ECed`
+- Deployment transaction: `0x61d3c505f536c7f005ad9a847e4351ec7bd9fcc872833e559ef39d3961042f87`
+- Demo anchor transaction: `0x6881d3ce2fcf2e61d5cffb916d57e0a0e1269e045d0c4034243f1e1450c383e1`
+- Demo digest: `0xd73740764c58b2c875c03ff0ccc3cc6d90d21d75ac2c08f07a47195947c14a27`
+
+Both transaction receipts returned status `1`, the deployed address contains contract bytecode, and the registry returned `true` for the demo digest. The deployment used faucet-only test ETH and a disposable testnet signer held in memory; the contract has no owner or administrator role.
 
 ## What is original in this P053 package
 
@@ -43,7 +52,7 @@ The read-only ProofPay transaction parser and user interface existed before this
 2. Run the receipt-core tests and display the deterministic digest.
 3. Change one atomic unit and show that the digest changes.
 4. Review the Solidity event and replay-protection error.
-5. After owner-authorized testnet deployment only, verify a public test transfer, anchor the digest, and show the transaction in an Arbitrum Sepolia explorer.
+5. Open the live registry and demo anchor transaction in Arbiscan, then read back the stored digest.
 
 ## Judging alignment
 
@@ -62,7 +71,7 @@ Minimum owner actions:
 1. Sign in or create the HackQuest account personally and accept the event terms.
 2. Confirm eligibility, legal identity/team details and the treatment of pre-existing work.
 3. Review and authorize a public repository under the owner's truthful identity.
-4. Use an authorized test wallet to deploy on Arbitrum Sepolia and create the demo transaction; use faucet assets only and do not spend mainnet funds.
+4. Review the verified Arbitrum Sepolia deployment and demo anchor; use faucet assets only and do not spend mainnet funds.
 5. Provide the submission links and any required project/team information.
 6. If selected, review the milestone agreement and provide only a public payout address. Complete KYC or other due diligence only if the official terms require it; the accessible event page did not establish the KYC rule.
 
