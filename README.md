@@ -4,13 +4,18 @@ ProofPay turns public stablecoin transfer facts into a portable work-payment rec
 
 ## Repository status
 
-This is a local, pre-submission candidate for Arbitrum Open House Singapore and the Crypto World's Fair. It has not been deployed, audited, or submitted. It has no users or traction claims.
+**Live demo:** https://proofpay-arbitrum.clod.chatgpt.site/
+
+The web demo is publicly deployed as a pre-submission candidate for Arbitrum Open House Singapore. The registry contract has not yet been deployed or audited, and the project makes no user or traction claims.
 
 The read-only receipt verifier in `web/` predates the Open House build window. The receipt commitment schema, deterministic hashing module, Solidity registry, and associated tests were added for the Open House package. This distinction must remain in any hackathon submission.
 
 ## Components
 
 - `web/`: read-only multi-chain USDC receipt verifier with an offline demo.
+- `web/anchor.mjs`: browser-safe canonicalization and digest preparation for the interactive demo.
+- `web/wallet.mjs`: optional, user-reviewed Arbitrum Sepolia anchoring through an injected EVM wallet.
+- `web/registry-bytecode.mjs`: reproducible browser deployment bytecode compiled from the registry source.
 - `contracts/ProofPayReceiptRegistry.sol`: dependency-free receipt commitment registry.
 - `lib/receipt-core.mjs`: validation, canonicalization, hashing, and contract-call preparation.
 - `test/receipt-core.test.mjs`: commitment-layer unit tests.
@@ -26,6 +31,7 @@ The contract is unaudited experimental software. Use Arbitrum Sepolia and faucet
 
 ```sh
 node --test web/test.mjs
+node --test web/anchor.test.mjs
 node --test test/receipt-core.test.mjs
 node --check web/app.js
 node --check web/core.mjs
