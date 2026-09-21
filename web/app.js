@@ -1,4 +1,6 @@
-import { buildReceiptProof, parseUsdcTransfers } from "./core.mjs";
+import { buildReceiptProof, parseUsdcTransfers } from "./core.mjs?v=proofpay-2";
+import { buildAnchorCall } from "./anchor.mjs?v=proofpay-2";
+import { anchorReceipt, connectWallet, deployRegistry, isEvmAddress } from "./wallet.mjs?v=proofpay-5";
 
 const CHAINS = {
   arbitrum: {
@@ -34,8 +36,19 @@ const statusBox = document.querySelector("#status");
 const result = document.querySelector("#result");
 const downloadButton = document.querySelector("#download-button");
 const resetButton = document.querySelector("#reset-button");
+const copyHashButton = document.querySelector("#copy-hash-button");
+const registryAddressInput = document.querySelector("#registry-address");
+const anchorButton = document.querySelector("#anchor-button");
+const connectWalletButton = document.querySelector("#connect-wallet-button");
+const deployRegistryButton = document.querySelector("#deploy-registry-button");
+const anchorStatus = document.querySelector("#anchor-status");
+
+const LIVE_REGISTRY = "0x19A333DCcE504858AedAd6D8E3cd3d9d7FB6ECed";
+const DEMO_RECEIPT_HASH = "0xd73740764c58b2c875c03ff0ccc3cc6d90d21d75ac2c08f07a47195947c14a27";
+const DEMO_ANCHOR_URL = "https://sepolia.arbiscan.io/tx/0x6881d3ce2fcf2e61d5cffb916d57e0a0e1269e045d0c4034243f1e1450c383e1";
 
 let latestProof = null;
+let latestAnchor = null;
 
 async function rpc(url, method, params) {
   const response = await fetch(url, {
@@ -59,9 +72,9 @@ function setStatus(message, kind = "neutral") {
   statusBox.hidden = false;
 }
 
-function renderProof(proof, explorerUrl) {
+async function renderProof(proof, explorerUrl) {
   latestProof = proof;
-  document.querySelector("#amount").textContent = `${proof.transfer.amount} USDC`;
+  document.querySelector("#amount").textContent = `${proof.transfer.amount} ${proof.asset.symbol}`;
   document.querySelector("#network").textContent = proof.chain;
   document.querySelector("#sender").textContent = shortAddress(proof.transfer.from);
   document.querySelector("#sender").title = proof.transfer.from;
@@ -76,6 +89,26 @@ function renderProof(proof, explorerUrl) {
     proof.publicReference || "No public reference supplied";
   const explorer = document.querySelector("#explorer-link");
   explorer.href = `${explorerUrl}${proof.transactionHash}`;
+  const anchor = await buildAnchorCall(proof);
+  latestAnchor = anchor;
+  document.querySelector("#receipt-hash").textContent = anchor.receiptHash;
+  document.querySelector("#anchor-chain").textContent = String(anchor.sourceChainId);
+  document.querySelector("#anchor-token").textContent = shortAddress(anchor.token);
+  document.querySelector("#anchor-token").title = anchor.token;
+  document.querySelector("#anchor-amount").textContent = anchor.amount;
+  copyHashButton.dataset.hash = anchor.receiptHash;
+  anchorButton.disabled = !isEvmAddress(registryAddressInput.value);
+  if (anchor.receiptHash === DEMO_RECEIPT_HASH) {
+    anchorStatus.innerHTML = "";
+    const link = document.createElement("a");
+    link.href = DEMO_ANCHOR_URL;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    link.textContent = "Demo digest anchored on Arbitrum Sepolia ↗";
+    anchorStatus.append(link);
+  } else {
+    anchorStatus.textContent = "Prepared locally · no transaction sent";
+  }
   result.hidden = false;
   setStatus("Verified from public onchain data.", "success");
 }
@@ -124,7 +157,7 @@ async function verifyTransaction(event) {
       publicReference: referenceInput.value.trim(),
       contractAddress: config.usdc,
     });
-    renderProof(proof, config.explorer);
+    await renderProof(proof, config.explorer);
   } catch (error) {
     setStatus(error.message || "Verification failed", "error");
   } finally {
@@ -132,7 +165,7 @@ async function verifyTransaction(event) {
   }
 }
 
-function showDemo() {
+async function showDemo() {
   const demo = {
     schema: "proofpay.receipt.v1",
     verifiedAt: new Date().toISOString(),
@@ -144,9 +177,9 @@ function showDemo() {
     blockTimestamp: new Date(Date.now() - 3600_000).toISOString(),
     confirmations: 3210,
     asset: {
-      symbol: "USDC",
+      symbol: "USDG",
       decimals: 6,
-      contractAddress: CHAINS.arbitrum.usdc,
+      contractAddress: "0x004B506865409877C9fA29bfb1ebA929984B9bbC",
     },
     transfer: {
       from: `0x${"1".repeat(40)}`,
@@ -159,7 +192,7 @@ function showDemo() {
     verificationMethod: "Demonstration fixture; no RPC call was made",
     privacyNote: "No wallet connection, signature, seed phrase, or private key was used.",
   };
-  renderProof(demo, "https://arbiscan.io/tx/");
+  await renderProof(demo, "https://arbiscan.io/tx/");
   setStatus("Demo mode: illustrative data only, not a real payment.", "warning");
 }
 
@@ -184,4 +217,90 @@ resetButton.addEventListener("click", () => {
   result.hidden = true;
   statusBox.hidden = true;
   latestProof = null;
+  latestAnchor = null;
+  anchorButton.disabled = true;
+  anchorStatus.textContent = "Prepared locally · no transaction sent";
+  registryAddressInput.value = LIVE_REGISTRY;
+});
+
+copyHashButton.addEventListener("click", async () => {
+  const hash = copyHashButton.dataset.hash;
+  if (!hash) return;
+  try {
+    await navigator.clipboard.writeText(hash);
+    anchorStatus.textContent = "Digest copied · no transaction sent";
+  } catch {
+    anchorStatus.textContent = "Select the digest above to copy it";
+  }
+});
+
+registryAddressInput.addEventListener("input", () => {
+  anchorButton.disabled = !latestAnchor || !isEvmAddress(registryAddressInput.value);
+});
+
+connectWalletButton.addEventListener("click", async () => {
+  connectWalletButton.disabled = true;
+  anchorStatus.textContent = "Waiting for wallet permission…";
+  try {
+    const address = await connectWallet();
+    anchorStatus.innerHTML = "";
+    const addressText = document.createElement("span");
+    addressText.id = "connected-wallet";
+    addressText.dataset.address = address;
+    addressText.textContent = `Wallet ${shortAddress(address)} · `;
+    const faucet = document.createElement("a");
+    faucet.href = "https://faucet.quicknode.com/arbitrum/sepolia";
+    faucet.target = "_blank";
+    faucet.rel = "noreferrer";
+    faucet.textContent = "Get test ETH ↗";
+    anchorStatus.append(addressText, faucet);
+  } catch (error) {
+    anchorStatus.textContent = error?.message || "Wallet was not connected";
+  } finally {
+    connectWalletButton.disabled = false;
+  }
+});
+
+deployRegistryButton.addEventListener("click", async () => {
+  deployRegistryButton.disabled = true;
+  anchorStatus.textContent = "Waiting for wallet review…";
+  try {
+    const deployment = await deployRegistry();
+    registryAddressInput.value = deployment.address;
+    anchorButton.disabled = !latestAnchor;
+    anchorStatus.innerHTML = "";
+    const link = document.createElement("a");
+    link.href = deployment.explorerUrl;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    link.textContent = "Registry deployed · view on Arbiscan ↗";
+    anchorStatus.append(link);
+  } catch (error) {
+    anchorStatus.textContent = error?.message || "Registry was not deployed";
+  } finally {
+    deployRegistryButton.disabled = false;
+  }
+});
+
+anchorButton.addEventListener("click", async () => {
+  if (!latestAnchor) return;
+  anchorButton.disabled = true;
+  anchorStatus.textContent = "Waiting for wallet review…";
+  try {
+    const transaction = await anchorReceipt({
+      registryAddress: registryAddressInput.value.trim(),
+      anchor: latestAnchor,
+    });
+    anchorStatus.innerHTML = "";
+    const link = document.createElement("a");
+    link.href = transaction.explorerUrl;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    link.textContent = "Transaction submitted · view on Arbiscan ↗";
+    anchorStatus.append(link);
+  } catch (error) {
+    anchorStatus.textContent = error?.message || "Wallet transaction was not sent";
+  } finally {
+    anchorButton.disabled = !isEvmAddress(registryAddressInput.value);
+  }
 });

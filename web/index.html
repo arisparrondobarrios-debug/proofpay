@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Verify stablecoin work payments from public blockchain data without connecting a wallet."
+      content="Verify stablecoin work payments from public blockchain data and prepare privacy-conscious receipt commitments on Arbitrum."
     />
+    <meta name="theme-color" content="#090b10" />
     <title>ProofPay — Verify stablecoin work payments</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23090b10'/%3E%3Cpath d='M18 46V18h16c9 0 14 5 14 13s-5 13-14 13h-7v2H18zm9-11h7c3 0 5-1 5-4s-2-4-5-4h-7v8z' fill='%2379f2c0'/%3E%3C/svg%3E" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -16,17 +18,20 @@
         <span class="brand-mark">P</span>
         <span>ProofPay</span>
       </a>
-      <span class="privacy-pill">Read-only · no wallet connection</span>
+      <div class="header-actions">
+        <a class="code-link" href="https://github.com/arisparrondobarrios-debug/proofpay" target="_blank" rel="noreferrer">Source ↗</a>
+        <span class="privacy-pill">Read-only by default · Arbitrum Sepolia registry live</span>
+      </div>
     </header>
 
     <main id="top">
       <section class="hero">
-        <p class="eyebrow">VERIFIABLE CRYPTO WORK RECEIPTS</p>
-        <h1>Turn a stablecoin transaction into portable proof of payment.</h1>
+        <p class="eyebrow">VERIFIABLE WORK-PAYMENT RECEIPTS · ARBITRUM-FIRST</p>
+        <h1>Verify the transfer. Keep the receipt. Anchor the proof.</h1>
         <p class="lede">
-          ProofPay checks canonical USDC transfers using public blockchain data and creates a
-          privacy-conscious receipt. It never asks for a seed phrase, private key, signature, or
-          wallet connection.
+          ProofPay checks canonical stablecoin transfers from public blockchain data, creates a
+          portable receipt, and prepares a privacy-conscious digest for optional anchoring on
+          Arbitrum. Read-only verification never asks for a wallet.
         </p>
       </section>
 
@@ -35,7 +40,7 @@
           <div class="card-heading">
             <div>
               <p class="step">01 · Verify</p>
-              <h2>Check a USDC payment</h2>
+              <h2>Check a stablecoin payment</h2>
             </div>
             <span class="chain-badge">Arbitrum-first</span>
           </div>
@@ -74,6 +79,8 @@
           <p id="status" class="status" hidden aria-live="polite"></p>
           <p class="microcopy">
             Only a public transaction hash is sent to the selected network’s public RPC endpoint.
+            The live verifier currently recognizes canonical USDC; the safe demo shows the USDG
+            receipt format used for the Arbitrum build.
           </p>
         </form>
 
@@ -99,6 +106,61 @@
             <a id="explorer-link" href="#" target="_blank" rel="noreferrer">Open explorer ↗</a>
             <button id="reset-button" class="text-button" type="button">Start over</button>
           </div>
+
+          <section class="anchor-panel" aria-labelledby="anchor-title">
+            <div class="anchor-heading">
+              <div>
+                <p class="step">03 · Commit</p>
+                <h3 id="anchor-title">Privacy-safe Arbitrum digest</h3>
+              </div>
+              <span class="chain-badge">No private metadata</span>
+            </div>
+            <p>
+              ProofPay removes the optional reference, canonicalizes the public transfer facts,
+              and calculates a deterministic SHA-256 commitment.
+            </p>
+            <code id="receipt-hash">Preparing digest…</code>
+            <dl class="anchor-facts">
+              <div><dt>Source chain</dt><dd id="anchor-chain">—</dd></div>
+              <div><dt>Token</dt><dd id="anchor-token">—</dd></div>
+              <div><dt>Atomic amount</dt><dd id="anchor-amount">—</dd></div>
+            </dl>
+            <div class="anchor-actions">
+              <button id="copy-hash-button" class="secondary" type="button">Copy digest</button>
+              <span id="anchor-status">Prepared locally · no transaction sent</span>
+            </div>
+            <div class="wallet-anchor">
+              <label for="registry-address">Arbitrum Sepolia registry</label>
+              <input
+                id="registry-address"
+                name="registryAddress"
+                type="text"
+                inputmode="text"
+                spellcheck="false"
+                autocomplete="off"
+                value="0x19A333DCcE504858AedAd6D8E3cd3d9d7FB6ECed"
+                placeholder="Deploy the registry, then paste its 0x address"
+              />
+              <p class="deployment-evidence">
+                Live testnet evidence:
+                <a href="https://sepolia.arbiscan.io/address/0x19A333DCcE504858AedAd6D8E3cd3d9d7FB6ECed" target="_blank" rel="noreferrer">registry ↗</a>
+                ·
+                <a href="https://sepolia.arbiscan.io/tx/0x61d3c505f536c7f005ad9a847e4351ec7bd9fcc872833e559ef39d3961042f87" target="_blank" rel="noreferrer">deployment ↗</a>
+                ·
+                <a href="https://sepolia.arbiscan.io/tx/0x6881d3ce2fcf2e61d5cffb916d57e0a0e1269e045d0c4034243f1e1450c383e1" target="_blank" rel="noreferrer">demo anchor ↗</a>
+              </p>
+              <div class="wallet-actions">
+                <button id="connect-wallet-button" class="secondary" type="button">Connect wallet</button>
+                <button id="deploy-registry-button" class="secondary" type="button">Deploy another registry</button>
+                <button id="anchor-button" type="button" disabled>Anchor digest</button>
+              </div>
+              <p>
+                Optional Arbitrum Sepolia actions require an EVM wallet with Arbitrum support,
+                such as MetaMask or Rabby. Phantom does not support Arbitrum. Your wallet shows
+                every transaction for review; never enter a seed phrase here.
+              </p>
+            </div>
+          </section>
         </article>
       </section>
 
@@ -115,8 +177,8 @@
         </article>
         <article>
           <span>03</span>
-          <h3>Export a receipt</h3>
-          <p>Create a portable JSON record with the amount, addresses, block time, and method.</p>
+          <h3>Commit only the digest</h3>
+          <p>Export the receipt and optionally anchor its deterministic hash without publishing invoice text.</p>
         </article>
       </section>
 
@@ -131,10 +193,20 @@
           <li>Separate real income from promised rewards using onchain evidence.</li>
         </ul>
       </section>
+
+      <section class="build-boundary" aria-label="Build boundary">
+        <p class="eyebrow">CLEAR BUILD BOUNDARY</p>
+        <h2>Verification stays useful without a wallet.</h2>
+        <p>
+          The read-only transaction parser predates the Arbitrum build. The deterministic receipt
+          commitment, mutation detection, registry contract, and anchoring preparation are the new
+          Arbitrum layer. Anchoring remains optional and must be reviewed and signed by the user.
+        </p>
+      </section>
     </main>
 
     <footer>
-      <p>ProofPay prototype · built during Crypto World’s Fair 2026</p>
+      <p>ProofPay prototype · prepared for Arbitrum Open House 2026</p>
       <p>Public data only. Not accounting, tax, legal, or custody software.</p>
     </footer>
 
