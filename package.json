@@ -1,0 +1,11 @@
+{
+  "name": "proofpay-open-house-public",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy:demo": "node scripts/deploy-demo.mjs"
+  },
+  "dependencies": {
+    "ethers": "6.15.0"
+  }
+}
