@@ -6,7 +6,11 @@ ProofPay turns public stablecoin transfer facts into a portable work-payment rec
 
 **Live demo:** https://proofpay-arbitrum.clod.chatgpt.site/
 
-The web demo is publicly deployed as a pre-submission candidate for Arbitrum Open House Singapore. The registry contract has not yet been deployed or audited, and the project makes no user or traction claims.
+The web demo is publicly deployed as a pre-submission candidate for Arbitrum Open House Singapore. The registry contract is live on Arbitrum Sepolia and remains unaudited; the project makes no user or traction claims.
+
+- **Registry:** https://sepolia.arbiscan.io/address/0x19A333DCcE504858AedAd6D8E3cd3d9d7FB6ECed
+- **Deployment transaction:** https://sepolia.arbiscan.io/tx/0x61d3c505f536c7f005ad9a847e4351ec7bd9fcc872833e559ef39d3961042f87
+- **Demo anchor transaction:** https://sepolia.arbiscan.io/tx/0x6881d3ce2fcf2e61d5cffb916d57e0a0e1269e045d0c4034243f1e1450c383e1
 
 The read-only receipt verifier in `web/` predates the Open House build window. The receipt commitment schema, deterministic hashing module, Solidity registry, and associated tests were added for the Open House package. This distinction must remain in any hackathon submission.
 
@@ -17,13 +21,14 @@ The read-only receipt verifier in `web/` predates the Open House build window. T
 - `web/wallet.mjs`: optional, user-reviewed Arbitrum Sepolia anchoring through an injected EVM wallet.
 - `web/registry-bytecode.mjs`: reproducible browser deployment bytecode compiled from the registry source.
 - `contracts/ProofPayReceiptRegistry.sol`: dependency-free receipt commitment registry.
+- `scripts/deploy-demo.mjs`: reproducible testnet-only deployment and demo anchoring flow.
 - `lib/receipt-core.mjs`: validation, canonicalization, hashing, and contract-call preparation.
 - `test/receipt-core.test.mjs`: commitment-layer unit tests.
 - `docs/SUBMISSION-PACK.md`: positioning, demo flow, disclosure, and owner gates.
 
 ## Safety boundary
 
-The verifier reads public RPC data and never asks for a private key or seed phrase. Anchoring a digest is optional and requires the user to review and sign a transaction in their own wallet. This repository does not contain a deployment key, payout address, secret, mainnet transaction, or live contract address.
+The verifier reads public RPC data and never asks for a private key or seed phrase. Anchoring a new digest is optional and requires the user to review and sign a transaction in a compatible wallet. The published registry was deployed from a disposable testnet-only signer kept in memory; the contract has no administrator or owner role and the signer key was not retained. This repository contains no deployment key, payout address, secret, or mainnet transaction.
 
 The contract is unaudited experimental software. Use Arbitrum Sepolia and faucet assets for hackathon testing; do not use mainnet funds.
 
@@ -37,6 +42,8 @@ node --check web/app.js
 node --check web/core.mjs
 node --check lib/receipt-core.mjs
 ```
+
+The live deployment and demo anchor were independently read back from Arbitrum Sepolia after both receipts returned status `1` and `receiptExists(demoDigest)` returned `true`.
 
 ## Disclosure
 
